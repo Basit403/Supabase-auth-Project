@@ -32,8 +32,12 @@ export default function AuthPage() {
         alert("Signup successful! Check your email for confirmation link.");
         router.push("/dashboard");
       }
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert("An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }
@@ -81,17 +85,16 @@ export default function AuthPage() {
             disabled={loading}
             className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
           >
-            {loading
-              ? "Processing..."
-              : isLogin
-              ? "Login"
-              : "Sign Up"}
+            {loading ? "Processing..." : isLogin ? "Login" : "Sign Up"}
           </button>
         </form>
 
         <p className="text-sm text-center mt-4 text-gray-600">
           {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-          <span onClick={() => setIsLogin(!isLogin)} className="text-blue-600 cursor-pointer hover:underline">
+          <span
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-blue-600 cursor-pointer hover:underline"
+          >
             {isLogin ? "Sign up" : "Login"}
           </span>
         </p>
