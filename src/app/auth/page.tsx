@@ -23,6 +23,7 @@ export default function AuthPage() {
     setLoading(true);
     try {
       if (isLogin) {
+        await supabase.auth.signOut();
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         router.push("/dashboard");
