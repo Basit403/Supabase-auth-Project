@@ -73,7 +73,7 @@ export default function AuthPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="border p-3 rounded-lg"
+            className="border p-3 rounded-lg placeholder:text-black"
             required
           />
           <input
@@ -81,7 +81,7 @@ export default function AuthPage() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="border p-3 rounded-lg"
+            className="border p-3 rounded-lg placeholder:text-black"
             required
           />
           {!isLogin && (
@@ -90,7 +90,7 @@ export default function AuthPage() {
               placeholder="Confirm Password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="border p-3 rounded-lg"
+              className="border p-3 rounded-lg placeholder:text-black"
               required
             />
           )}
