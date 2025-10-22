@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function Dashboard() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -11,16 +11,26 @@ export default function Dashboard() {
 
   useEffect(() => {
     const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      if (data?.user) {
-        setUserEmail(data.user?.email ?? null);
+      if (user) {
+        setUserEmail(user?.email ?? null);
       } else {
         router.push("/auth");
       }
     };
 
     getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) router.push("/auth");
+    });
+
+    return () => subscription.unsubscribe();
   }, [router]);
 
   const handleLogout = async () => {
@@ -48,7 +58,7 @@ export default function Dashboard() {
           </span>
         </h1>
         <p className="text-gray-600 mb-8">
-          You’re logged in to your Aremu dashboard.
+          You are logged in to your Arem dashboard.
         </p>
         <button
           onClick={handleLogout}

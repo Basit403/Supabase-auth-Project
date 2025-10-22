@@ -1,16 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
 export default function AuthPage() {
+  const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        console.log("Already logged in, redirecting to dashboard...");
+        router.replace("/dashboard");
+      }
+    };
+    checkSession();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,33 +33,38 @@ export default function AuthPage() {
 
     setLoading(true);
     try {
+      let error;
+      let data;
+
       if (isLogin) {
-        await supabase.auth.signOut();
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        router.push("/dashboard");
+        ({ data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        }));
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-        alert("Signup successful! Check your email for confirmation link.");
-        router.push("/dashboard");
+        ({ data, error } = await supabase.auth.signUp({
+          email,
+          password,
+        }));
+        alert("Signup successful! Check your email to confirm.");
       }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        alert(err.message);
-      } else {
-        alert("An unexpected error occurred.");
-      }
+
+      if (error) throw error;
+
+      router.replace("/dashboard");
+    } catch (err: any) {
+      console.error("Auth error:", err);
+      alert(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-200">
-      <div className="bg-white shadow-2xl rounded-2xl p-8 w-96">
-        <h2 className="text-3xl font-bold mb-6 text-center text-blue-600">
-          {isLogin ? "Welcome Back" : "Create Account"}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <div className="bg-white shadow-lg rounded-xl p-8 w-96">
+        <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">
+          {isLogin ? "Login" : "Create Account"}
         </h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -57,34 +73,31 @@ export default function AuthPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="border p-3 rounded-lg"
             required
           />
-
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="border p-3 rounded-lg"
             required
           />
-
           {!isLogin && (
             <input
               type="password"
               placeholder="Confirm Password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="border p-3 rounded-lg"
               required
             />
           )}
-
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+            className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
           >
             {loading ? "Processing..." : isLogin ? "Login" : "Sign Up"}
           </button>
@@ -103,3 +116,4 @@ export default function AuthPage() {
     </div>
   );
 }
+

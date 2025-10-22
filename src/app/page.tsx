@@ -1,7 +1,34 @@
-import Link from "next/link";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
+import { User } from "@supabase/supabase-js";
 import Image from "next/image";
 
 export default function Home() {
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user) {
+        console.log("User already logged in — redirecting to dashboard...");
+        setUser(data.session.user);
+      }
+    };
+    checkSession();
+  }, []);
+
+  const handleClick = () => {
+    if (user) {
+      router.push("/dashboard");
+    } else {
+      router.push("/auth");
+    }
+  };
+
   return (
     <main className="min-h-screen flex flex-col md:flex-row">
       <div className="relative w-full h-[60vh] md:w-1/2 md:h-screen">
@@ -19,15 +46,16 @@ export default function Home() {
           Welcome <span className="text-blue-600">AREMU.</span>
         </h1>
         <p className="text-base md:text-xl text-gray-600 mb-8 max-w-md">
-          This is just a mini project about what i learned about Supabase Authentication.
+          This is just a mini project about what I learned about Supabase Authentication.
         </p>
-        <Link href="/auth">
-          <button className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition cursor-pointer">
-            Login | Sign Up
-          </button>
-        </Link>
+
+        <button
+          onClick={handleClick}
+          className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition cursor-pointer"
+        >
+          {user ? "Go to Dashboard" : "Login | Sign Up"}
+        </button>
       </div>
     </main>
   );
 }
-
