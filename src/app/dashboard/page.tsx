@@ -58,7 +58,7 @@ export default function Dashboard() {
           </span>
         </h1>
         <p className="text-gray-600 mb-8">
-          You are logged in to your Arem dashboard.
+          You are logged in to your Aremu dashboard.
         </p>
         <button
           onClick={handleLogout}
