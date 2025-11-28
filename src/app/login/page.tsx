@@ -6,6 +6,7 @@ import * as yup from "yup";
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import ReusableInput from "../components/FormInputs";
 
 const loginSchema = yup.object({
   email: yup.string().email("Enter a valid email").required("Email is required"),
@@ -44,7 +45,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: FormData) => {
     if (isLogin) {
-  
+      
       const { error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
@@ -55,11 +56,13 @@ export default function LoginPage() {
       } else {
         router.push("/dashboard");
       }
+
     } else {
       const { error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
       });
+
       if (error) {
         console.error("Signup error:", error.message);
       } else {
@@ -71,7 +74,7 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen flex flex-col justify-center items-center bg-gray-100 px-4">
       <h1 className="text-3xl font-bold mb-6 text-blue-600 text-center">
-        Aremu Authentication <br /> using React Hook Form and Yup validation.
+        Aremu Authentication <br /> using Reusable Inputs + Yup Validation
       </h1>
 
       <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
@@ -80,47 +83,31 @@ export default function LoginPage() {
         </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          
-          <div>
-            <input
-              type="email"
-              placeholder="Email"
-              {...register("email")}
-              className="w-full p-3 border border-gray-300 rounded-lg placeholder-black"
-            />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-            )}
-          </div>
 
-          <div>
-            <input
-              type="password"
-              placeholder="Password"
-              {...register("password")}
-              className="w-full p-3 border border-gray-300 rounded-lg placeholder-black"
-            />
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
+          <ReusableInput
+            name="email"
+            type="email"
+            placeholder="Email"
+            register={register}
+            error={errors.email}
+          />
+
+          <ReusableInput
+            name="password"
+            type="password"
+            placeholder="Password"
+            register={register}
+            error={errors.password}
+          />
 
           {!isLogin && (
-            <div>
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                {...register("confirmPassword")}
-                className="w-full p-3 border border-gray-300 rounded-lg placeholder-black"
-              />
-              {errors.confirmPassword && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
+            <ReusableInput
+              name="confirmPassword"
+              type="password"
+              placeholder="Confirm Password"
+              register={register}
+              error={errors.confirmPassword}
+            />
           )}
 
           <button
